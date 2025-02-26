@@ -1,0 +1,34 @@
+name: Commit as Bot
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write  # Grant write permissions for Actions
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch full commit history for resetting
+
+      - name: Configure Git user identity
+        run: |
+          git config --global user.name "Github"
+          git config --global user.email "Github@users.noreply.github.com"
+      - name: Reset history and make changes
+        run: |
+          git reset --soft $(git rev-list --max-parents=0 HEAD)  # Keep only the first commit
+          git commit --amend --no-edit --author="Webflow <Webflow@users.noreply.github.com>"
+          # Add new changes
+          echo "By" >> changes.txt
+          git add .
+          git commit -m "Webflow"
+      - name: Push changes
+        run: |
+          git push --force origin main
